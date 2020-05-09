@@ -10,6 +10,7 @@ It should work with any similar I2C display.
 Two test programs are provided:
 
 oled1106test - write some sample text and graphics to the display
+
 oled1106life - John Conway's life game, adapted for this display
 
 The code is reasonably well documented, if sub-optimal in places.
