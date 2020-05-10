@@ -13,7 +13,9 @@
 #include "oled1106.h"
 
 #define GENMAX 		20000
-#define STATICTEST 	50
+#define STABLEMAX 	50
+
+static int maxliving, minliving, genstable;
 
 int nextgen(int pi, int fd, void *bd, int columns, int rows)
 {
@@ -58,7 +60,7 @@ int nextgen(int pi, int fd, void *bd, int columns, int rows)
 
 void life(int pi, int fd, int columns, int rows)
 {
-	int lasttest,living,gens,notstatic;
+	int lasttest,living,gens;
 	time_t t;
 	uint8_t x,y;
 	uint8_t board[columns][rows];
@@ -67,8 +69,6 @@ void life(int pi, int fd, int columns, int rows)
 
 		gens=0;
 		lasttest=0;
-		living=1;
-		notstatic=1;
 	
 		// Initialize the board with a random pattern - one in twelve pixels on.
 		srand((unsigned) time(&t)); 
@@ -79,24 +79,39 @@ void life(int pi, int fd, int columns, int rows)
 			}
 		}
 
+		// Set living cells to 1 (obviously > 1 in all but bizarrely random circumstances
+		living=1;
+
+		// Reset genstable and maxliving variables to zero (ignore the starting cell colony count)
+		// and minliving to COLUMNS*ROWS
+		genstable=0;
+		maxliving=0;
+		minliving=COLUMNS*ROWS;
+
                 // Get the next generation provided some cells are still living or 1000 generations have passed
-		while ((living > 0) && (gens < GENMAX) && (notstatic)) {	
+		// and the pattern is not stable or repeating (ish - this algortihm is not exact)
+
+		while ((living > 0) && (gens < GENMAX) && (genstable < STABLEMAX)) {	
+
+			// Flush the framebuffer and compute the next generation
 			(void) oledflushfb(pi,fd);
+			lasttest=living;
 			living=nextgen(pi,fd,board,columns,rows);
 			++gens;
-			// Check to see if the pattern is probably static or repeating every STATICTEST iterations
-			// Note - this algrotihm can obviously generate false positives!!
-			if ((gens%STATICTEST) == 0) {
-				if (living == lasttest) {
-					notstatic=0;
-				}
-				else {
-					lasttest=living;
-				}
+
+			// Update the static variables
+			if(living > maxliving) maxliving=living;
+			if(living < minliving) minliving=living;
+			if (living == lasttest) { 
+				++genstable;
+			}
+			else {
+				genstable=0;
 			}
 		}
 
 		printf("Last simulation ended after %d generations with %d living cells\n",gens,living);
+		printf("Maximum living cells was %d, minimum was %d\n",maxliving,minliving);
                 fflush(stdout);
 
 		// Pause for 10 seconds before starting again
