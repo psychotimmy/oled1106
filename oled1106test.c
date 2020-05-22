@@ -11,6 +11,12 @@
 /******************************************************************************/
 #include "oled1106.h"
 
+#define PIXOFF          0       // Set pixel off
+#define PIXON           1       // Set pixel on
+#define PIXINV          2       // Invert pixel (ON becomes OFF, OFF becomes ON)
+#define FBONLY          1       // Write to the framebufffer only
+#define FBANDDISPLAY    2       // Write to the framebuffer and display simultaneously.
+
 /* Testing loop */
 
 int main() {

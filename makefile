@@ -12,8 +12,8 @@ CFLAGS = -Wall -lpigpiod_if2
 
 default: oled1106test oled1106life oled1106.a
 
-oled1106.a: oled1106global.o oled1106.o 
-	ar -crs oled1106.a oled1106global.o oled1106.o
+oled1106.a: oled1106.o 
+	ar -crs oled1106.a oled1106.o
 
 oled1106test: oled1106test.o oled1106.a
 	$(CC) $(CFLAGS) -o oled1106test oled1106test.o oled1106.a
@@ -22,9 +22,6 @@ oled1106test: oled1106test.o oled1106.a
 oled1106life: oled1106life.o oled1106.a
 	$(CC) $(CFLAGS) -o oled1106life oled1106life.o oled1106.a
 	strip oled1106life
-
-oled1106global.o:  oled1106global.c oled1106.h 
-	$(CC) $(CFLAGS) -c oled1106global.c
 
 oled1106.o:  oled1106.c oled1106.h
 	$(CC) $(CFLAGS) -c oled1106.c
